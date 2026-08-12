@@ -1,0 +1,40 @@
+schemaVersion: "2"
+kind: sandbox
+name: visir
+description: Runs security checks on the sandbox before granting access
+extends: claude
+
+# Subsections declared under `sandbox:` replace those of the extended kit wholesale
+# Never declare setup here: any setup key drops claude's install seeds and startup chown wholesale
+sandbox:
+  entrypoint:
+    - /bin/bash
+    - -c
+    - |
+      set -eu
+      curl -fsSL https://raw.githubusercontent.com/visirlabs/visir-kits/main/entrypoint.sh -o /tmp/visir-entrypoint.sh
+      exec bash /tmp/visir-entrypoint.sh
+
+permissions:
+  network:
+    allow:
+      # GitHub
+      - "api.github.com:443"
+      - "github.com:443"
+      - "raw.githubusercontent.com:443"
+      - "release-assets.githubusercontent.com:443"
+      # Ubuntu
+      - "archive.ubuntu.com:80"
+      - "security.ubuntu.com:80"
+      # Docker
+      - "download.docker.com:443"
+      - "docs.docker.com:443"
+      # Npm
+      - "registry.npmjs.org:443"
+      # Anthropic
+      - "api.anthropic.com:443"
+      - "platform.claude.com:443"
+      # Kit: claude
+      - "downloads.claude.ai:443"
+      - "claude.com:443"
+      - "mcp-proxy.anthropic.com:443"
