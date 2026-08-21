@@ -1,10 +1,11 @@
 #!/bin/bash
-# check: no ~/.ssh
+# check: no ~/.ssh in any home
 set -eu
 
-if [ ! -e "$HOME/.ssh" ]; then
+homes="$(find /home -maxdepth 2 -type d -name .ssh 2>/dev/null || true)"
+if [ -z "$homes" ]; then
 	exit 0
 fi
 
-echo "$HOME/.ssh exists"
+echo "found: $(echo "$homes" | paste -sd' ' -)"
 exit 1
