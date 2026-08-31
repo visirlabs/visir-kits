@@ -31,13 +31,13 @@ permissions:
       - "docs.docker.com:443"
       # Npm
       - "registry.npmjs.org:443"
-      # Anthropic
+      # Kit: claude — the full base allow list as of sbx 0.39.0
       - "api.anthropic.com:443"
       - "platform.claude.com:443"
-      # Kit: claude
       - "downloads.claude.ai:443"
       - "claude.com:443"
       - "mcp-proxy.anthropic.com:443"
+      - "bridge.claudeusercontent.com:443"
       # OpenCode
       - "opencode.ai:443"
       - "models.opencode.ai:443"
