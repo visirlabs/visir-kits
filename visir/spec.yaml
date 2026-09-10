@@ -38,7 +38,3 @@ permissions:
       - "claude.com:443"
       - "mcp-proxy.anthropic.com:443"
       - "bridge.claudeusercontent.com:443"
-      # OpenCode
-      - "opencode.ai:443"
-      - "models.opencode.ai:443"
-      - "api.githubcopilot.com:443"

@@ -49,7 +49,4 @@ if [ "$failed" -ne 0 ]; then
 	exit 1
 fi
 echo "visir: all checks passed"
-# Installed per entry, only once entry is granted, so existing sandboxes get opencode without recreation
-command -v opencode >/dev/null || npm install -g opencode-ai
-
 exec bash -l

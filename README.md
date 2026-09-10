@@ -58,6 +58,25 @@ The same command re-enters the sandbox later, as does `sbx run --name visir-your
 > - No output at all (hangs) — the sbx daemon's backing engine is wedged;
 >   `sbx daemon restart` (this stops all running sandboxes), then re-run.
 
+## Optional kits
+
+Extra tooling is opt-in. The baseline `visir` kit is only the gate and its
+network policy; stack a mixin kit onto `sbx run` to add a tool to a new sandbox.
+
+| Kit | Installs |
+|---|---|
+| `opencode` | the [opencode](https://opencode.ai) CLI, its model-provider credentials, and the sandbox MCP gateway |
+| `az-cli` | the Azure CLI (`az`) and the `azure-devops` extension |
+
+```bash
+sbx settings set kit.allowedSources '["docker.io/","github.com/visirlabs/"]'
+sbx run visir --kit docker.io/visirlabs/visir:latest \
+  --kit "git+https://github.com/visirlabs/visir-kits.git#dir=opencode"
+```
+
+A mixin only reaches sandboxes created with it: an existing sandbox has to be
+recreated (see [Upgrade](#upgrade)) to pick one up.
+
 ## Upgrade
 
 Checks and the gate update themselves: every entry fetches the latest from

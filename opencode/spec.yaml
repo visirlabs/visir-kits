@@ -1,0 +1,188 @@
+schemaVersion: "2"
+kind: mixin
+name: opencode
+description: Installs the opencode CLI (opencode-ai) and wires its model providers.
+
+# Stack after the visir kit:
+#   sbx run visir <workspace> --kit docker.io/visirlabs/visir:latest \
+#     --kit "git+https://github.com/visirlabs/visir-kits.git#dir=opencode"
+#
+# The credentials, MCP-gateway step and provider hosts are ported from sbx's
+# built-in `opencode` agent kit (upstream/kits/opencode.yaml, sbx v0.39.0),
+# trimmed to what a mixin on the claude base can carry: no image/entrypoint,
+# no `oauth:` credential, and anthropic left to the inherited claude base.
+setup:
+  install:
+    - description: Install the opencode CLI
+      # node/npm are on the agent user's PATH in the claude-code image, not
+      # root's, so the step runs as agent. `bash -lc` loads the same login-shell
+      # environment the entrypoint later hands over — a bare exec here has a
+      # minimal PATH with no npm.
+      user: "agent"
+      command: |
+        bash -lc '
+          set -eu
+          command -v opencode >/dev/null 2>&1 || npm install -g opencode-ai
+          # Fail creation rather than hand over a sandbox where opencode is
+          # missing — a non-zero exit here leaves no sandbox behind.
+          command -v opencode >/dev/null
+        '
+  startup:
+    # Seed ~/.config/opencode/opencode.json fresh on every start (opencode owns
+    # the file, no baseline keys to preserve):
+    #  - model: default to opencode's free hosted "big-pickle". Without a default,
+    #    opencode auto-selects from whatever provider env vars are present — and
+    #    sbx injects a proxy-managed placeholder for every wired credential even
+    #    when the host has no key, so it would otherwise land on a dead provider.
+    #  - mcp: point at the sandbox MCP gateway, same as the claude base wires into
+    #    ~/.claude. sandboxd injects MCP_GATEWAY_URL + MCP_SENTINEL_TOKEN_NAME as
+    #    container env when a gateway is reserved; the sentinel is not the token,
+    #    the proxy substitutes the real one per request. Omitted when unset.
+    - command:
+        - sh
+        - -c
+        - |
+          set -e
+          mkdir -p "$HOME/.config/opencode"
+          if [ -n "$MCP_GATEWAY_URL" ]; then
+            cat > "$HOME/.config/opencode/opencode.json" <<EOF
+          {
+            "\$schema": "https://opencode.ai/config.json",
+            "model": "opencode/big-pickle",
+            "mcp": {
+              "mcp-gateway": {
+                "type": "remote",
+                "url": "$MCP_GATEWAY_URL",
+                "enabled": true,
+                "headers": {
+                  "Authorization": "Bearer $MCP_SENTINEL_TOKEN_NAME"
+                }
+              }
+            }
+          }
+          EOF
+          else
+            cat > "$HOME/.config/opencode/opencode.json" <<EOF
+          {
+            "\$schema": "https://opencode.ai/config.json",
+            "model": "opencode/big-pickle"
+          }
+          EOF
+          fi
+      user: "agent"
+      description: Seed opencode.json (default model + sandbox MCP gateway)
+
+permissions:
+  network:
+    allow:
+      # install pulls the package tarball from npm
+      - "registry.npmjs.org:443"
+      # opencode's own model catalog and update check
+      - "opencode.ai:443"
+      - "models.opencode.ai:443"
+      # install, git-based plugin installs, and runtime LSP-server auto-install
+      # reach GitHub; release downloads 302 to release-assets.githubusercontent.com
+      - "api.github.com:443"
+      - "github.com:443"
+      - "raw.githubusercontent.com:443"
+      - "release-assets.githubusercontent.com:443"
+      - "codeload.github.com:443"
+      # Provider APIs — the matching credential below injects the host's key on
+      # each. Kept explicit rather than leaning on credential-domain auto-allow,
+      # which is sbx-version-specific.
+      # Anthropic (api.anthropic.com is also in the visir baseline)
+      - "api.anthropic.com:443"
+      - "claude.ai:443"
+      - "console.anthropic.com:443"
+      # GitHub Copilot, all subscription tiers
+      - "api.githubcopilot.com:443"
+      - "api.business.githubcopilot.com:443"
+      - "api.enterprise.githubcopilot.com:443"
+      - "api.individual.githubcopilot.com:443"
+      - "copilot.github.com:443"
+      # Google (Gemini / Vertex AI)
+      - "aiplatform.googleapis.com:443"
+      - "generativelanguage.googleapis.com:443"
+      - "oauth2.googleapis.com:443"
+      - "vertexai.googleapis.com:443"
+      # OpenAI
+      - "api.openai.com:443"
+      - "openai.com:443"
+      # OpenRouter
+      - "openrouter.ai:443"
+
+# Unions with the claude base's `anthropic` credential (inherited through the
+# visir kit), which already covers opencode's Anthropic use — so it is not
+# re-declared here. `apiKey.name` is the host env var the proxy reads;
+# `proxyManaged` masks it from the sandbox. Nothing here provisions a
+# credential — each is inert unless the host supplies the key.
+credentials:
+  - service: github
+    apiKey:
+      name: ""
+      inject:
+        # One auth format per service, so the whole list is Bearer: the Copilot
+        # API rejects "token", GitHub's REST API takes both, and git on
+        # github.com is re-encoded to Basic by the proxy regardless.
+        - domain: api.business.githubcopilot.com
+          header: Authorization
+          format: Bearer %s
+        - domain: api.enterprise.githubcopilot.com
+          header: Authorization
+          format: Bearer %s
+        - domain: api.github.com
+          header: Authorization
+          format: Bearer %s
+        - domain: api.githubcopilot.com
+          header: Authorization
+          format: Bearer %s
+        - domain: api.individual.githubcopilot.com
+          header: Authorization
+          format: Bearer %s
+        - domain: copilot.github.com
+          header: Authorization
+          format: Bearer %s
+        - domain: github.com
+          header: Authorization
+          format: Bearer %s
+        - domain: raw.githubusercontent.com
+          header: Authorization
+          format: Bearer %s
+  - service: google
+    apiKey:
+      name: GOOGLE_GENERATIVE_AI_API_KEY
+      proxyManaged: true
+      inject:
+        - domain: aiplatform.googleapis.com
+          header: x-goog-api-key
+          format: "%s"
+        - domain: generativelanguage.googleapis.com
+          header: x-goog-api-key
+          format: "%s"
+        - domain: oauth2.googleapis.com
+          header: x-goog-api-key
+          format: "%s"
+        - domain: vertexai.googleapis.com
+          header: x-goog-api-key
+          format: "%s"
+  - service: openai
+    # API-key only: a mixin may not declare an `oauth:` block (sbx allows it on
+    # agent kits only), so opencode's ChatGPT-subscription path is not wired.
+    apiKey:
+      name: OPENAI_API_KEY
+      proxyManaged: true
+      inject:
+        - domain: api.openai.com
+          header: Authorization
+          format: Bearer %s
+        - domain: openai.com
+          header: Authorization
+          format: Bearer %s
+  - service: openrouter
+    apiKey:
+      name: OPENROUTER_API_KEY
+      proxyManaged: true
+      inject:
+        - domain: openrouter.ai
+          header: Authorization
+          format: Bearer %s
