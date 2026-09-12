@@ -4,8 +4,7 @@ name: visir
 description: Runs security checks on the sandbox before granting access
 extends: claude
 
-# Subsections declared under `sandbox:` replace those of the extended kit wholesale
-# Never declare setup here: any setup key drops claude's install seeds and startup chown wholesale
+# Declared sections merge with the extended kit's; the rest is inherited.
 sandbox:
   entrypoint:
     - /bin/bash
@@ -31,7 +30,7 @@ permissions:
       - "docs.docker.com:443"
       # Npm
       - "registry.npmjs.org:443"
-      # Kit: claude — the full base allow list as of sbx 0.39.0
+      # Kit: claude — mirrors the base allow list
       - "api.anthropic.com:443"
       - "platform.claude.com:443"
       - "downloads.claude.ai:443"

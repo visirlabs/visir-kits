@@ -84,8 +84,9 @@ sbx run visir --kit docker.io/visirlabs/visir:latest \
   --kit "git+https://github.com/visirlabs/visir-kits.git#dir=opencode"
 ```
 
-A mixin only reaches sandboxes created with it: an existing sandbox has to be
-recreated (see [Upgrade](#upgrade)) to pick one up.
+A mixin can also be added afterwards: `sbx kit add <sandbox> <ref>` recreates
+the sandbox's container with the kit appended, keeping the workspace and the
+agent's session state.
 
 ## Upgrade
 
