@@ -7,12 +7,22 @@ All commands below work in bash and PowerShell.
 
 ## 1. Prerequisites
 
-- [sbx](https://docs.docker.com/ai/sandboxes/) (requires a Docker account)
+- [sbx](https://docs.docker.com/ai/sandboxes/) (requires a Docker account).
+  Visir is tested against sbx v0.42.1; other versions may break it.
 
 Verify that sbx is installed before continuing:
 
 ```bash
 sbx version
+```
+
+Visir blocks entry while sbx forwards an SSH agent into sandboxes, which sbx
+does by default. Turn forwarding off once per host; the restart stops all
+running sandboxes:
+
+```bash
+sbx settings set ssh.agentForwardingEnabled false
+sbx daemon restart
 ```
 
 ## 2. Network policy
