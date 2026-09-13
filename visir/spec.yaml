@@ -2,9 +2,16 @@ schemaVersion: "2"
 kind: sandbox
 name: visir
 description: Runs security checks on the sandbox before granting access
-extends: claude
+args:
+  base:
+    default: claude
+    description: Built-in agent kit to extend
+    enum: [claude, codex, copilot, cursor, devin, docker-agent, droid, gemini, kiro, opencode, shell]
+extends: ${{ kit.args.base }}
 
 # Declared sections merge with the extended kit's; the rest is inherited.
+# The base's hosts reach the allow list only through that merge, which
+# needs sbx v0.42.1 or newer: earlier releases replaced permissions: wholesale.
 sandbox:
   entrypoint:
     - /bin/bash
@@ -30,10 +37,3 @@ permissions:
       - "docs.docker.com:443"
       # Npm
       - "registry.npmjs.org:443"
-      # Kit: claude — mirrors the base allow list
-      - "api.anthropic.com:443"
-      - "platform.claude.com:443"
-      - "downloads.claude.ai:443"
-      - "claude.com:443"
-      - "mcp-proxy.anthropic.com:443"
-      - "bridge.claudeusercontent.com:443"

@@ -42,7 +42,7 @@ sbx policy init deny-all
 From your project directory:
 
 ```bash
-sbx run visir --kit docker.io/visirlabs/visir:latest
+sbx run docker.io/visirlabs/visir:latest
 ```
 
 The first run creates a sandbox named `visir-` plus your project's directory name.
@@ -56,6 +56,17 @@ claude --dangerously-skip-permissions
 ```
 
 The same command re-enters the sandbox later, as does `sbx run --name visir-your-project`.
+
+The sandbox is built on sbx's `claude` agent unless you pick another built-in
+agent when it is first created:
+
+```bash
+sbx run docker.io/visirlabs/visir:latest --kit-arg visir.base=codex
+```
+
+`base` accepts `claude`, `codex`, `copilot`, `cursor`, `devin`, `docker-agent`,
+`droid`, `gemini`, `kiro`, `opencode` and `shell`. The agent is fixed when the
+sandbox is created; to change it, `sbx rm` the sandbox and run again.
 
 > **Note**: `sbx run` failures at startup are distinguished by their message:
 >
@@ -80,9 +91,12 @@ network policy; stack a mixin kit onto `sbx run` to add a tool to a new sandbox.
 
 ```bash
 sbx settings set kit.allowedSources '["docker.io/","github.com/visirlabs/"]'
-sbx run visir --kit docker.io/visirlabs/visir:latest \
+sbx run docker.io/visirlabs/visir:latest \
   --kit "git+https://github.com/visirlabs/visir-kits.git#dir=opencode"
 ```
+
+Re-enter that sandbox with the plain command from [Run](#3-run): sbx accepts
+`--kit` only when it creates a sandbox.
 
 A mixin can also be added afterwards: `sbx kit add <sandbox> <ref>` recreates
 the sandbox's container with the kit appended, keeping the workspace and the
@@ -116,5 +130,5 @@ a kit source once per host:
 
 ```bash
 sbx settings set kit.allowedSources '["docker.io/","github.com/visirlabs/"]'
-sbx run visir --kit "git+https://github.com/visirlabs/visir-kits.git#dir=visir"
+sbx run "git+https://github.com/visirlabs/visir-kits.git#dir=visir"
 ```

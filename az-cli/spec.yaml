@@ -4,7 +4,7 @@ name: az-cli
 description: Installs the Azure CLI (az) and the Azure DevOps extension.
 
 # Stack after the visir kit:
-#   sbx run visir <workspace> --kit docker.io/visirlabs/visir:latest \
+#   sbx run docker.io/visirlabs/visir:latest <workspace> \
 #     --kit "git+https://github.com/visirlabs/visir-kits.git#dir=az-cli"
 setup:
   install:

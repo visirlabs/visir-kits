@@ -4,7 +4,7 @@ name: opencode
 description: Installs the opencode CLI (opencode-ai) and wires its model providers.
 
 # Stack after the visir kit:
-#   sbx run visir <workspace> --kit docker.io/visirlabs/visir:latest \
+#   sbx run docker.io/visirlabs/visir:latest <workspace> \
 #     --kit "git+https://github.com/visirlabs/visir-kits.git#dir=opencode"
 #
 # The credentials, MCP-gateway step and provider hosts are ported from sbx's

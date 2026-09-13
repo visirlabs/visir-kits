@@ -2,7 +2,7 @@
 # Live-fetched from main by every visir sandbox at entry — never move or rename; hand over a shell or exit nonzero.
 set -eu
 
-# Exported here so the kit leaves claude's environment section untouched
+# Exported here so the kit leaves the base kit's environment section untouched
 export DO_NOT_TRACK=1 DISABLE_TELEMETRY=1 BD_DISABLE_METRICS=1
 
 dir=/tmp/visir-gate
