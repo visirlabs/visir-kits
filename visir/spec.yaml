@@ -19,7 +19,9 @@ sandbox:
     - |
       set -eu
       curl -fsSL https://raw.githubusercontent.com/visirlabs/visir-kits/main/entrypoint.sh -o /tmp/visir-entrypoint.sh
-      exec bash /tmp/visir-entrypoint.sh
+      exec bash /tmp/visir-entrypoint.sh '${{ kit.args.base }}' "$@"
+    # Placeholder so sbx run's own trailing args reach the agent.
+    - --
 
 permissions:
   network:

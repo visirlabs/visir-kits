@@ -48,14 +48,10 @@ sbx run docker.io/visirlabs/visir:latest
 The first run creates a sandbox named `visir-` plus your project's directory name.
 Every run fetches the latest checks and runs them.
 If any check fails, Visir blocks entry.
-If all checks pass, you get a shell in the sandbox.
-From there you can start an agent, e.g.:
-
-```bash
-claude --dangerously-skip-permissions
-```
+If all checks pass, Visir starts the agent.
 
 The same command re-enters the sandbox later, as does `sbx run --name visir-your-project`.
+Pass agent flags after `--`, e.g. `sbx run docker.io/visirlabs/visir:latest -- --resume`.
 
 The sandbox is built on sbx's `claude` agent unless you pick another built-in
 agent when it is first created:
@@ -65,8 +61,9 @@ sbx run docker.io/visirlabs/visir:latest --kit-arg visir.base=codex
 ```
 
 `base` accepts `claude`, `codex`, `copilot`, `cursor`, `devin`, `docker-agent`,
-`droid`, `gemini`, `kiro`, `opencode` and `shell`. The agent is fixed when the
-sandbox is created; to change it, `sbx rm` the sandbox and run again.
+`droid`, `gemini`, `kiro`, `opencode` and `shell`, and is fixed at create time
+(`sbx rm` and re-run to change it). `base=shell`, and any sandbox created
+before this behavior shipped, drops straight into a shell instead.
 
 > **Note**: `sbx run` failures at startup are distinguished by their message:
 >
@@ -122,8 +119,10 @@ Then see [Run](#3-run).
 
 The kit's entrypoint fetches `entrypoint.sh` from the
 [visir-kits](https://github.com/visirlabs/visir-kits) repo at every entry;
-that script clones it and runs `gate.sh` against `checks/`. That is what
-keeps existing sandboxes current without recreation.
+that script clones it, runs `gate.sh` against `checks/`, and — once the gate
+passes — hands off to `enter.sh`, which waits for Enter and launches the
+agent (or, for `base=shell`, hands over a shell directly). That is what keeps
+existing sandboxes current without recreation.
 
 To reference the visir-kits repo directly instead of Docker Hub, allow it as
 a kit source once per host:

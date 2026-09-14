@@ -9,4 +9,5 @@ dir=/tmp/visir-gate
 rm -rf "$dir"
 git clone -q --depth=1 https://github.com/visirlabs/visir-kits.git "$dir"
 echo "visir: checks @ $(git -C "$dir" rev-parse --short HEAD)"
-exec bash "$dir/gate.sh" "$dir/checks"
+bash "$dir/gate.sh" "$dir/checks"
+exec bash "$dir/enter.sh" "$@"

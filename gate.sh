@@ -1,5 +1,6 @@
 #!/bin/bash
-# Fails closed: any unexpected error aborts before the shell is handed over.
+# Security-only: prints check results and returns 0 or 1. Fails closed: any
+# unexpected error aborts before enter.sh runs.
 #
 # A check declares "# check: <name>", exits 0 to pass or 1 to fail with a
 # one-line reason on stdout.
@@ -49,4 +50,3 @@ if [ "$failed" -ne 0 ]; then
 	exit 1
 fi
 echo "visir: all checks passed"
-exec bash -l
