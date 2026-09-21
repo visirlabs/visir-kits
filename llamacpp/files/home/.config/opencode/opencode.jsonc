@@ -9,7 +9,10 @@
       "options": {
         "baseURL": "http://host.docker.internal:${{ kit.args.port }}/v1",
         "modelsDiscovery": {
-          "enabled": true
+          "enabled": true,
+          "cache": {
+            "enabled": true
+          }
         }
       }
     }

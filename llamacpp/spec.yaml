@@ -14,7 +14,27 @@ args:
     description: Router preset id to select on startup — name one of your llama-server presets "default" to use this
     pattern: "[A-Za-z0-9_.-]+"
 
+setup:
+  install:
+    - description: Pre-install the opencode-models-discovery plugin
+      user: "agent"
+      command: |
+        bash -lc '
+          set -eu
+          command -v opencode >/dev/null 2>&1 || { echo "This kit requires opencode which was not found on PATH. Make sure opencode is installed before this kit." >&2; exit 1; }
+          opencode plugin opencode-models-discovery@latest --global
+        '
+  startup:
+    - description: Refresh discovered llama.cpp models into the persisted cache
+      user: "agent"
+      background: true
+      command:
+        - bash
+        - -lc
+        - opencode models --refresh
+
 permissions:
   network:
     allow:
       - "localhost:${{ kit.args.port }}"
+      - "registry.npmjs.org:443"
