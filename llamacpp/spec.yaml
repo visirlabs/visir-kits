@@ -1,0 +1,20 @@
+schemaVersion: "2"
+kind: mixin
+name: llamacpp
+displayName: llama.cpp (localhost)
+description: Adds config for llama.cpp running on host
+
+args:
+  port:
+    default: "9000"
+    description: Port llama-server listens on (localhost)
+    pattern: "[0-9]+"
+  model:
+    default: "default"
+    description: Router preset id to select on startup — name one of your llama-server presets "default" to use this
+    pattern: "[A-Za-z0-9_.-]+"
+
+permissions:
+  network:
+    allow:
+      - "localhost:${{ kit.args.port }}"
